@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "340836263095",
+    "project_id": "meumusic-98c39",
+    "storage_bucket": "meumusic-98c39.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:340836263095:android:51f4655d630c75f4501932",
+        "android_client_info": {
+          "package_name": "com.example.meu_music"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApSFEXP7aXZ3kqxSrwVDcsdJ8YaJh2L54"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
