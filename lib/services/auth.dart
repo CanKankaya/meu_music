@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-UserCredential? currentUser;
+User? currentUser;
 
 Future<String?> register(
   String email,
@@ -14,13 +14,13 @@ Future<String?> register(
   String studentId,
 ) async {
   try {
-    var userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+    var result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
-    log(currentUser?.user?.uid ?? "No UID");
+    log(result.user?.uid ?? "No UID");
 
-    return userCredential.user?.uid;
+    return result.user?.uid;
   } on FirebaseAuthException catch (e) {
     switch (e.code) {
       case 'weak-password':
@@ -43,11 +43,12 @@ Future<String?> register(
 
 Future<String?> login(String email, String password) async {
   try {
-    currentUser = await FirebaseAuth.instance.signInWithEmailAndPassword(
+    var result = await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: email,
       password: password,
     );
-    log(currentUser?.user?.uid ?? "No UID");
+    log(result.user?.uid ?? "No UID");
+    currentUser = result.user;
     return null;
   } on FirebaseAuthException catch (e) {
     switch (e.code) {
@@ -68,9 +69,22 @@ Future<String?> login(String email, String password) async {
 Future<String> logout() async {
   try {
     await FirebaseAuth.instance.signOut();
+    currentUser = null;
     return "Logout successful!";
   } catch (e) {
     return e.toString();
+  }
+}
+
+void autoLogin(
+  User? userData,
+) {
+  try {
+    currentUser = userData;
+    log(currentUser?.uid ?? "No UID");
+    log(currentUser?.email ?? "No Email");
+  } catch (e) {
+    log(e.toString());
   }
 }
 

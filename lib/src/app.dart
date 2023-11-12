@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:meu_music/screens/add_user.dart';
 import 'package:meu_music/screens/home_screen.dart';
 import 'package:meu_music/screens/login_screen.dart';
+import 'package:meu_music/services/auth.dart';
 
 import 'sample_feature/sample_item_details_view.dart';
 import 'settings/settings_controller.dart';
@@ -73,9 +76,17 @@ class MyApp extends StatelessWidget {
                     return const SampleItemDetailsView();
                   case HomeScreen.routeName:
                     return HomeScreen();
+                  case AddUserScreen.routeName:
+                    return const AddUserScreen();
 
                   default:
-                    return LoginScreen(controller: settingsController);
+                    {
+                      if (FirebaseAuth.instance.currentUser != null) {
+                        autoLogin(FirebaseAuth.instance.currentUser);
+                        return HomeScreen();
+                      }
+                      return LoginScreen(controller: settingsController);
+                    }
                 }
               },
             );

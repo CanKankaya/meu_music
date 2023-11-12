@@ -30,9 +30,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final _focusStudentId = FocusNode();
   final _focusPassword = FocusNode();
 
+  var isLoading = false;
+  var isRegister = false;
+  var obscureText = true;
+
   @override
   void initState() {
     super.initState();
+
     _focusName.addListener(_onFocusChange);
     _focusSurname.addListener(_onFocusChange);
     _focusEmail.addListener(_onFocusChange);
@@ -68,9 +73,6 @@ class _LoginScreenState extends State<LoginScreen> {
       _focusPassword;
     });
   }
-
-  var isRegister = false;
-  var obscureText = true;
 
   @override
   Widget build(BuildContext context) {
@@ -140,59 +142,74 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             CustomButton(
-              onPressed: isRegister
-                  ? () async {
-                      //
-                      var result = await register(
-                        _emailController.text,
-                        _passwordController.text,
-                        _nameController.text,
-                        _surnameController.text,
-                        _phoneNumberController.text,
-                        _studentIdController.text,
-                      );
-                      if (result == null) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          Navigator.pushNamed(context, '/home');
-                        });
-                      } else {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(result),
-                            ),
+              onPressed: isLoading
+                  ? null
+                  : isRegister
+                      ? () async {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          var result = await register(
+                            _emailController.text,
+                            _passwordController.text,
+                            _nameController.text,
+                            _surnameController.text,
+                            _phoneNumberController.text,
+                            _studentIdController.text,
                           );
-                        });
-                      }
-                    }
-                  : () async {
-                      var result = await login(
-                        _emailController.text,
-                        _passwordController.text,
-                      );
-                      if (result == null) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          Navigator.pushNamed(context, '/home');
-                        });
-                      } else {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(result),
-                            ),
+                          if (result == null) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                            });
+                          } else {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(result),
+                                ),
+                              );
+                            });
+                          }
+                          setState(() {
+                            isLoading = false;
+                          });
+                        }
+                      : () async {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          var result = await login(
+                            _emailController.text,
+                            _passwordController.text,
                           );
-                        });
-                      }
-                    },
+                          if (result == null) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                            });
+                          } else {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(result),
+                                ),
+                              );
+                            });
+                          }
+                          setState(() {
+                            isLoading = false;
+                          });
+                        },
               text: isRegister ? 'Register' : 'Login',
             ),
             const SizedBox(height: 16),
             TextButton(
-              onPressed: () async {
-                setState(() {
-                  isRegister = !isRegister;
-                });
-              },
+              onPressed: isLoading
+                  ? () {}
+                  : () async {
+                      setState(() {
+                        isRegister = !isRegister;
+                      });
+                    },
               child: Text(isRegister ? 'Already have an account? Login' : 'Register'),
             ),
           ],
