@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:meu_music/services/auth.dart';
-import 'package:meu_music/src/settings/settings_controller.dart';
 import 'package:meu_music/widgets/custom_button.dart';
 import 'package:meu_music/widgets/custom_form_field.dart';
 
 class LoginScreen extends StatefulWidget {
-  final SettingsController controller;
-
   static const routeName = '/';
 
-  const LoginScreen({super.key, required this.controller});
+  const LoginScreen({
+    super.key,
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -183,6 +182,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             _passwordController.text,
                           );
                           if (result == null) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(result ?? 'Login successful'),
+                                ),
+                              );
+                            });
                             WidgetsBinding.instance.addPostFrameCallback((_) {
                               Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                             });

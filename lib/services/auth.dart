@@ -19,8 +19,9 @@ Future<String?> register(
       password: password,
     );
     log(result.user?.uid ?? "No UID");
+    currentUser = result.user;
 
-    return result.user?.uid;
+    return null;
   } on FirebaseAuthException catch (e) {
     switch (e.code) {
       case 'weak-password':
