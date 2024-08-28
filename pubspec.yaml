@@ -24,6 +24,9 @@ dependencies:
   mask_text_input_formatter: ^2.9.0
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.4.1
+  permission_handler: ^11.3.1
+  camera: ^0.11.0+2
+  google_mlkit_text_recognition: ^0.13.0
 
 dev_dependencies:
   flutter_test:

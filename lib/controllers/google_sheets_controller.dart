@@ -66,7 +66,7 @@ class GoogleSheetsController extends GetxController {
 
       studentList.assignAll(fetchedStudents);
 
-      log('Fetched students: $studentList');
+      log('Fetched students from sheet');
     } catch (e) {
       log('Error fetching students: $e');
     }
@@ -98,6 +98,7 @@ class GoogleSheetsController extends GetxController {
       //*Add Locally if successful
       addStudentsLocal(students);
       log('Added students: $students');
+
       return null;
     } catch (e) {
       log(e.toString());

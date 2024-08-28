@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:meu_music/controllers/add_student_controller.dart';
 import 'package:meu_music/controllers/google_sheets_controller.dart';
 import 'package:meu_music/models/student.dart';
 import 'package:meu_music/widgets/custom_drawer.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../widgets/custom_textformfield.dart';
 import '../services/text_helper.dart';
 
@@ -19,12 +21,7 @@ class AddStudentScreen extends StatefulWidget {
 
 class AddStudentScreenState extends State<AddStudentScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _tcController = TextEditingController();
-  final _studentNumberController = TextEditingController();
-  final _phoneNumberController = TextEditingController();
-  final _departmentController = TextEditingController();
-  bool _ibanChecked = false;
+  final AddStudentController controller = Get.put(AddStudentController());
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
@@ -32,12 +29,12 @@ class AddStudentScreenState extends State<AddStudentScreen> {
       // You can call your add student function here
       final result = await widget.googleSheetsController.addStudents([
         Student(
-          name: _nameController.text,
-          tc: _tcController.text,
-          studentNumber: _studentNumberController.text,
-          phoneNumber: _phoneNumberController.text,
-          department: _departmentController.text,
-          iban: _ibanChecked ? "Iban" : null,
+          name: controller.nameController.text,
+          tc: controller.tcController.text,
+          studentNumber: controller.studentNumberController.text,
+          phoneNumber: controller.phoneNumberController.text,
+          department: controller.departmentController.text,
+          iban: controller.ibanChecked.value ? "Iban" : null,
           addedDate: DateTime.now(),
         )
       ]);
@@ -53,13 +50,13 @@ class AddStudentScreenState extends State<AddStudentScreen> {
         );
 
         // Clear form fields
-        _nameController.clear();
-        _tcController.clear();
-        _studentNumberController.clear();
-        _phoneNumberController.clear();
-        _departmentController.clear();
+        controller.nameController.clear();
+        controller.tcController.clear();
+        controller.studentNumberController.clear();
+        controller.phoneNumberController.clear();
+        controller.departmentController.clear();
         setState(() {
-          _ibanChecked = false;
+          controller.ibanChecked.value = false;
         });
       } else {
         // Show error message
@@ -77,91 +74,126 @@ class AddStudentScreenState extends State<AddStudentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Öğrenci Ekle'),
-      ),
-      drawer: const CustomDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              CustomTextFormField(
-                labelText: 'Name',
-                controller: _nameController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Lütfen ismi girin';
-                  }
-                  return null;
-                },
-              ),
-              CustomTextFormField(
-                labelText: 'TC',
-                controller: _tcController,
-                input: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Lütfen TC girin';
-                  }
-                  return null;
-                },
-              ),
-              CustomTextFormField(
-                labelText: 'Öğrenci Numarası',
-                controller: _studentNumberController,
-                input: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Lütfen öğrenci numarası girin';
-                  }
-                  return null;
-                },
-              ),
-              CustomTextFormField(
-                labelText: 'Telefon Numarası',
-                controller: _phoneNumberController,
-                input: TextInputType.phone,
-                inputFormatters: [phoneMaskFormatter],
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Lütfen telefon numarasını girin';
-                  }
-                  return null;
-                },
-              ),
-              CustomTextFormField(
-                labelText: 'Bölüm',
-                controller: _departmentController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Lütfen bölümü girin';
-                  }
-                  return null;
-                },
-              ),
-              CheckboxListTile(
-                title: const Text('IBAN'),
-                value: _ibanChecked,
-                onChanged: (bool? value) {
-                  setState(() {
-                    _ibanChecked = value ?? false;
-                  });
-                },
-              ),
-              Obx(
-                () => widget.googleSheetsController.addLoading.value
-                    ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                        onPressed: _submitForm,
-                        child: const Text('Ekle'),
-                      ),
-              ),
-            ],
-          ),
+        appBar: AppBar(
+          title: const Text('Öğrenci Ekle'),
         ),
-      ),
-    );
+        drawer: const CustomDrawer(),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Obx(
+            () => Form(
+              key: _formKey,
+              child: ListView(
+                children: [
+                  CustomTextFormField(
+                    labelText: 'Name',
+                    controller: controller.nameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Lütfen ismi girin';
+                      }
+                      return null;
+                    },
+                  ),
+                  CustomTextFormField(
+                    labelText: 'TC',
+                    controller: controller.tcController,
+                    input: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Lütfen TC girin';
+                      }
+                      return null;
+                    },
+                  ),
+                  CustomTextFormField(
+                    labelText: 'Öğrenci Numarası',
+                    controller: controller.studentNumberController,
+                    input: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Lütfen öğrenci numarası girin';
+                      }
+                      return null;
+                    },
+                  ),
+                  CustomTextFormField(
+                    labelText: 'Telefon Numarası',
+                    controller: controller.phoneNumberController,
+                    input: TextInputType.phone,
+                    inputFormatters: [phoneMaskFormatter],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Lütfen telefon numarasını girin';
+                      }
+                      return null;
+                    },
+                  ),
+                  CustomTextFormField(
+                    labelText: 'Bölüm',
+                    controller: controller.departmentController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Lütfen bölümü girin';
+                      }
+                      return null;
+                    },
+                  ),
+                  CheckboxListTile(
+                    title: const Text('IBAN'),
+                    value: controller.ibanChecked.value,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        controller.ibanChecked.value = value ?? false;
+                      });
+                    },
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      // Ask for permissions
+                      Permission.camera.request().then((status) {
+                        if (status.isGranted) {
+                          Get.toNamed('/text-scanner');
+                        } else if (status.isDenied) {
+                          Get.snackbar(
+                            'Hata',
+                            'Kamera izni verilmedi',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
+                        } else if (status.isPermanentlyDenied) {
+                          Get.snackbar(
+                            'Hata',
+                            'Kamera izni verilmedi.',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                            duration: const Duration(seconds: 3),
+                            mainButton: TextButton(
+                              onPressed: () {
+                                openAppSettings();
+                              },
+                              child: const Text(
+                                'Ayarları Aç',
+                              ),
+                            ),
+                          );
+                        }
+                      });
+                    },
+                    child: const Text('Öğrenci Kartı Tara'),
+                  ),
+                  widget.googleSheetsController.addLoading.value
+                      ? const Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed: _submitForm,
+                          child: const Text('Ekle'),
+                        ),
+                ],
+              ),
+            ),
+          ),
+        ));
   }
 }

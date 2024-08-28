@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:meu_music/controllers/google_sheets_controller.dart';
 import 'package:meu_music/screens/add_student_screen.dart';
 import 'package:meu_music/screens/home_screen.dart';
+import 'package:meu_music/screens/text_scanner_screen.dart';
 
 import 'settings/settings_controller.dart';
 
@@ -76,6 +77,10 @@ class MyApp extends StatelessWidget {
               page: () => AddStudentScreen(
                 googleSheetsController: googleSheetsController,
               ),
+            ),
+            GetPage(
+              name: TextScannerScreen.routeName,
+              page: () => TextScannerScreen(),
             ),
           ],
         );
