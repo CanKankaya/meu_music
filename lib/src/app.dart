@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:meu_music/controllers/google_sheets_controller.dart';
+import 'package:meu_music/screens/add_student_screen.dart';
 import 'package:meu_music/screens/home_screen.dart';
 
 import 'settings/settings_controller.dart';
@@ -67,6 +68,12 @@ class MyApp extends StatelessWidget {
             GetPage(
               name: HomeScreen.routeName,
               page: () => HomeScreen(
+                googleSheetsController: googleSheetsController,
+              ),
+            ),
+            GetPage(
+              name: AddStudentScreen.routeName,
+              page: () => AddStudentScreen(
                 googleSheetsController: googleSheetsController,
               ),
             ),

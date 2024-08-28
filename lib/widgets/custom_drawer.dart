@@ -26,7 +26,6 @@ class CustomDrawer extends StatelessWidget {
                   child: Text(
                     'MEU Müzik Yönetim',
                     style: TextStyle(
-                      color: Color(0xFF1C873F),
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -43,11 +42,9 @@ class CustomDrawer extends StatelessWidget {
                         screen.iconAsset!,
                         width: 24,
                         height: 24,
-                        color: Colors.green[800],
                       )
                     : Icon(
                         screen.icon,
-                        color: Colors.green[800],
                       ),
                 title: Text(screen.dTitle),
                 onTap: () async {
@@ -84,7 +81,7 @@ class DrawerItem {
 
 final List<DrawerItem> screensInDrawer = [
   DrawerItem(dTitle: "Ana Sayfa", dRoute: "/home", icon: Icons.home),
-  // DrawerItem(dTitle: "Profil", dRoute: "/profile", icon: Icons.person),
+  DrawerItem(dTitle: "Öğrenci Ekle", dRoute: "/add-student", icon: Icons.person_add),
   // DrawerItem(dTitle: "Cihaz Ayarlarım", dRoute: "/device-settings", icon: Icons.devices),
   // DrawerItem(dTitle: "Cihaz Raporlarım", dRoute: "/device_reports", icon: Icons.description),
   // DrawerItem(

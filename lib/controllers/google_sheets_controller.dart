@@ -29,11 +29,13 @@ class GoogleSheetsController extends GetxController {
   var excelOffset = 2;
 
   var loading = false.obs;
+  var editLoading = false.obs;
+  var addLoading = false.obs;
   var studentList = <Student>[].obs;
 
   @override
   void onInit() {
-    fetchStudents(apiTestSheetId, fullHeaderRange);
+    fetchStudents(spreadsheetId, fullHeaderRange);
     super.onInit();
   }
 
@@ -71,7 +73,8 @@ class GoogleSheetsController extends GetxController {
     loading(false);
   }
 
-  Future<void> addStudents(List<Student> students) async {
+  Future<String?> addStudents(List<Student> students) async {
+    addLoading(true);
     try {
       final sheetsApi = await _getSheetsApi();
       final values = students
@@ -95,8 +98,13 @@ class GoogleSheetsController extends GetxController {
       //*Add Locally if successful
       addStudentsLocal(students);
       log('Added students: $students');
+      return null;
     } catch (e) {
       log(e.toString());
+
+      return 'Bir hata oluştu. Lütfen tekrar deneyin.';
+    } finally {
+      addLoading(false);
     }
   }
 
@@ -110,6 +118,7 @@ class GoogleSheetsController extends GetxController {
   }
 
   Future<void> editStudents(List<Student> students) async {
+    editLoading(true);
     try {
       final sheetsApi = await _getSheetsApi();
       for (var student in students) {
@@ -137,6 +146,7 @@ class GoogleSheetsController extends GetxController {
       //* Edit Locally if successful
       editStudentsLocal(students);
       log('Edited students: $students');
+      editLoading(false);
     } catch (e) {
       log(e.toString());
     }
@@ -145,12 +155,13 @@ class GoogleSheetsController extends GetxController {
   void editStudentsLocal(List<Student> students) {
     for (var student in students) {
       if (student.rowNumber != null) {
-        studentList[student.rowNumber! - 1] = student;
+        studentList[student.rowNumber! - 1 - excelOffset] = student;
       }
     }
   }
 
   Future<void> deleteStudents(List<int> rowNumbers) async {
+    loading(true);
     try {
       final sheetsApi = await _getSheetsApi();
       final requests = <Request>[];
@@ -175,16 +186,10 @@ class GoogleSheetsController extends GetxController {
         await sheetsApi.spreadsheets.batchUpdate(batchUpdateRequest, spreadsheetId);
       }
 
-      //* Delete Locally if successful
-      deleteStudentsLocal(rowNumbers);
+      fetchStudents(spreadsheetId, fullHeaderRange);
     } catch (e) {
       log(e.toString());
     }
-  }
-
-  void deleteStudentsLocal(List<int> rowNumbers) {
-    for (var rowNumber in rowNumbers) {
-      studentList.removeWhere((student) => student.rowNumber == rowNumber);
-    }
+    loading(false);
   }
 }
