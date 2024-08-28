@@ -13,22 +13,22 @@ class CustomDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          const DrawerHeader(
+          DrawerHeader(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5),
-                    child: Center(
-                      child: Icon(Icons.construction),
-                    )),
                 Expanded(
-                  child: Text(
-                    'MEU Müzik Yönetim',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Image.asset(
+                    'assets/icons/icon.png',
+                    width: 100,
+                    height: 100,
+                  ),
+                ),
+                const Text(
+                  'MEU Müzik Yönetim',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
