@@ -177,12 +177,12 @@ class _TextScannerScreenState extends State<TextScannerScreen> with WidgetsBindi
       final recognizedText = await textRecogniser.processImage(inputImage);
       log(recognizedText.text);
 
-      const dummyText =
-          "Avertidseds\nTC kimlik no/TRID No\n380740301 28 TEMP DUMMY TEXT\nMersinÜniversitesi\nMersinUniversity\nÖğrenci kimlik karti/Studentid card\nlisans/önlisans\nAd Soyad/Name Surname\nCAN KANKAYA\nÖğrenci no/studentID\n21220030080\nBölüm/department\nBilgisayar müh\nComputer engineering\nFakülte/Yüksekokul/Faculty/school\nMühendislik Fakültesi\nEngineering faculty";
+      // const dummyText =
+      //     "Avertidseds\nTC kimlik no/TRID No\n380740301 28 TEMP DUMMY TEXT\nMersinÜniversitesi\nMersinUniversity\nÖğrenci kimlik karti/Studentid card\nlisans/önlisans\nAd Soyad/Name Surname\nCAN KANKAYA\nÖğrenci no/studentID\n21220030080\nBölüm/department\nBilgisayar müh\nComputer engineering\nFakülte/Yüksekokul/Faculty/school\nMühendislik Fakültesi\nEngineering faculty";
 
       //* Fill the controller's fields accordingly, with logic
       var addStudentController = Get.find<AddStudentController>();
-      addStudentController.extractText(dummyText);
+      addStudentController.extractText(recognizedText.text);
 
       Get.back();
 

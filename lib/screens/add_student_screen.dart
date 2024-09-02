@@ -164,7 +164,7 @@ class AddStudentScreenState extends State<AddStudentScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: ElevatedButton(
+                  child: ElevatedButton.icon(
                     onPressed: () async {
                       // Ask for permissions
                       Permission.camera.request().then((status) {
@@ -198,7 +198,8 @@ class AddStudentScreenState extends State<AddStudentScreen> {
                         }
                       });
                     },
-                    child: const Text('Öğrenci Kartı Tara'),
+                    icon: const Icon(Icons.camera_alt),
+                    label: const Text('Öğrenci Kartı Tara'),
                   ),
                 ),
                 widget.googleSheetsController.addLoading.value

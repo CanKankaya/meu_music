@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:meu_music/controllers/google_sheets_controller.dart';
 
 extension StringExtensions on String {
   String removeSpaces() {
@@ -23,7 +24,7 @@ class AddStudentController extends GetxController {
   final departmentController = TextEditingController();
   final ibanChecked = false.obs;
 
-  void extractText(String text) {
+  void extractText(String text) async {
     //error handling
     if (text.isEmpty) {
       log("Text is empty");
@@ -31,8 +32,6 @@ class AddStudentController extends GetxController {
     }
     // Split the text into a list of strings
     List<String> texts = text.split('\n').map((e) => e.trim()).toList();
-
-    //TODO add logging for debug
 
     // Define regular expressions for each piece of information
     final tcPattern = RegExp(r'kimlik ?no|TC|TRID|TR ID', caseSensitive: false);
@@ -78,16 +77,60 @@ class AddStudentController extends GetxController {
       department = texts[index + 1];
     }
 
-    // Log the extracted information
-    log("TC Kimlik No: $tcKimlikNo");
-    log("Name/Surname: $nameSurname");
-    log("Student ID: $studentId");
-    log("Department: $department");
+    //*logging for debug if the results are not exactly as expected
+    final googleSheetsController = Get.find<GoogleSheetsController>();
+    bool hasError = false;
 
-    // Assign the values to the respective controllers
+    if (!isValidTcNo(tcKimlikNo)) {
+      hasError = true;
+      log("Invalid TC Kimlik No: $tcKimlikNo");
+    }
+
+    if (!isValidNameSurname(nameSurname)) {
+      hasError = true;
+      log("Invalid Name/Surname: $nameSurname");
+    }
+
+    if (!isValidStudentId(studentId)) {
+      hasError = true;
+      log("Invalid Student ID: $studentId");
+    }
+
+    if (!isValidDepartment(department)) {
+      hasError = true;
+      log("Invalid Department: $department");
+    }
+
+    if (hasError) {
+      googleSheetsController.addDebugLog(
+        tcKimlikNo ?? "",
+        nameSurname ?? "",
+        studentId ?? "",
+        department ?? "",
+      );
+    }
+
     tcController.text = tcKimlikNo ?? "";
     nameController.text = nameSurname ?? "";
     studentNumberController.text = studentId ?? "";
     departmentController.text = department ?? "";
+  }
+
+  bool isValidTcNo(String? tcKimlikNo) {
+    return tcKimlikNo != null &&
+        tcKimlikNo.length == 11 &&
+        RegExp(r'^\d{11}$').hasMatch(tcKimlikNo);
+  }
+
+  bool isValidNameSurname(String? nameSurname) {
+    return nameSurname != null && nameSurname.isNotEmpty && !RegExp(r'\d').hasMatch(nameSurname);
+  }
+
+  bool isValidStudentId(String? studentId) {
+    return studentId != null && studentId.length > 6 && RegExp(r'^\d+$').hasMatch(studentId);
+  }
+
+  bool isValidDepartment(String? department) {
+    return department != null && department.isNotEmpty && !RegExp(r'\d').hasMatch(department);
   }
 }

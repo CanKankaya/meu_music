@@ -193,4 +193,19 @@ class GoogleSheetsController extends GetxController {
     }
     loading(false);
   }
+
+  Future<void> addDebugLog(String tc, String name, String studentId, String department) async {
+    final logDate = DateFormat('dd.MM.yyyy').format(DateTime.now());
+    try {
+      final sheetsApi = await _getSheetsApi();
+      final values = [
+        [logDate, tc, name, studentId, department]
+      ];
+      final valueRange = ValueRange(values: values);
+      await sheetsApi.spreadsheets.values
+          .append(valueRange, apiTestSheetId, 'Debug!A:E', valueInputOption: 'RAW');
+    } catch (e) {
+      log(e.toString());
+    }
+  }
 }
