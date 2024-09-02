@@ -80,7 +80,7 @@ class MyApp extends StatelessWidget {
             ),
             GetPage(
               name: TextScannerScreen.routeName,
-              page: () => TextScannerScreen(),
+              page: () => const TextScannerScreen(),
             ),
           ],
         );

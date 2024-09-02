@@ -5,8 +5,10 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'package:meu_music/controllers/add_student_controller.dart';
+import 'package:meu_music/widgets/simpler_custom_loading.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'package:meu_music/controllers/add_student_controller.dart';
 
 class TextScannerScreen extends StatefulWidget {
   const TextScannerScreen({super.key});
@@ -62,56 +64,47 @@ class _TextScannerScreenState extends State<TextScannerScreen> with WidgetsBindi
     return FutureBuilder(
         future: future,
         builder: (context, snapshot) {
-          return Stack(
-            children: [
-              //Show camera content behind everything
-              if (isPermissionGranted)
-                FutureBuilder<List<CameraDescription>>(
-                    future: availableCameras(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        initCameraController(snapshot.data!);
-                        return Center(
-                          child: CameraPreview(cameraController!),
-                        );
-                      } else {
-                        return const LinearProgressIndicator();
-                      }
-                    }),
-              Scaffold(
-                appBar: AppBar(
-                  title: const Text('Text Recognition Sample'),
-                ),
-                backgroundColor: isPermissionGranted ? Colors.transparent : null,
-                body: isPermissionGranted
-                    ? Column(
-                        children: [
-                          Expanded(child: Container()),
-                          Container(
-                            padding: const EdgeInsets.only(bottom: 30),
-                            child: ElevatedButton(
-                                onPressed: isLoading
-                                    ? null
-                                    : () {
-                                        scanImage();
-                                      },
-                                child: isLoading
-                                    ? const CircularProgressIndicator()
-                                    : const Text('Scan Text')),
-                          ),
-                        ],
-                      )
-                    : Center(
-                        child: Container(
-                          padding: const EdgeInsets.only(left: 24.0, right: 24.0),
-                          child: const Text(
-                            'Camera Permission Denied',
-                            textAlign: TextAlign.center,
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Öğrenci Kartını Taratın'),
+            ),
+            body: FutureBuilder<List<CameraDescription>>(
+              future: availableCameras(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  initCameraController(snapshot.data!);
+                  return Stack(
+                    children: [
+                      SizedBox(child: CameraPreview(cameraController!)),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: IconButton(
+                            onPressed: isLoading
+                                ? null
+                                : () {
+                                    scanImage();
+                                  },
+                            icon: isLoading
+                                ? const SimplerCustomLoader()
+                                : const Icon(
+                                    Icons.camera,
+                                  ),
+                            color: const Color.fromARGB(215, 255, 193, 7),
+                            iconSize: 60,
                           ),
                         ),
-                      ),
-              ),
-            ],
+                      )
+                    ],
+                  );
+                } else {
+                  return const Center(child: CircularProgressIndicator.adaptive());
+                }
+              },
+            ),
           );
         });
   }
@@ -143,7 +136,7 @@ class _TextScannerScreenState extends State<TextScannerScreen> with WidgetsBindi
   }
 
   Future<void> cameraSelected(CameraDescription camera) async {
-    cameraController = CameraController(camera, ResolutionPreset.max, enableAudio: false);
+    cameraController = CameraController(camera, ResolutionPreset.veryHigh, enableAudio: false);
     await cameraController?.initialize();
     if (!mounted) {
       return;
@@ -184,12 +177,12 @@ class _TextScannerScreenState extends State<TextScannerScreen> with WidgetsBindi
       final recognizedText = await textRecogniser.processImage(inputImage);
       log(recognizedText.text);
 
-      // final dummyText =
-      //     "Avertidseds\nTC kimlik no/TRID No\n38074030128\nMersinÜniversitesi\nMersinUniversity\nÖğrenci kimlik karti/Studentid card\nlisans/önlisans\nAd Soyad/Name Surname\nCAN KANKAYA\nÖğrenci no/studentID\n21220030080\nBölüm/department\nBilgisayar müh\nComputer engineering\nFakülte/Yüksekokul/Faculty/school\nMühendislik Fakültesi\nEngineering faculty";
+      const dummyText =
+          "Avertidseds\nTC kimlik no/TRID No\n380740301 28 TEMP DUMMY TEXT\nMersinÜniversitesi\nMersinUniversity\nÖğrenci kimlik karti/Studentid card\nlisans/önlisans\nAd Soyad/Name Surname\nCAN KANKAYA\nÖğrenci no/studentID\n21220030080\nBölüm/department\nBilgisayar müh\nComputer engineering\nFakülte/Yüksekokul/Faculty/school\nMühendislik Fakültesi\nEngineering faculty";
 
       //* Fill the controller's fields accordingly, with logic
       var addStudentController = Get.find<AddStudentController>();
-      addStudentController.extractText(recognizedText.text);
+      addStudentController.extractText(dummyText);
 
       Get.back();
 

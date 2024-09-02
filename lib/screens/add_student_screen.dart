@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:meu_music/controllers/add_student_controller.dart';
 import 'package:meu_music/controllers/google_sheets_controller.dart';
 import 'package:meu_music/models/student.dart';
+import 'package:meu_music/services/connectivity_service.dart';
 import 'package:meu_music/widgets/custom_drawer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../widgets/custom_textformfield.dart';
@@ -22,6 +23,7 @@ class AddStudentScreen extends StatefulWidget {
 class AddStudentScreenState extends State<AddStudentScreen> {
   final _formKey = GlobalKey<FormState>();
   final AddStudentController controller = Get.put(AddStudentController());
+  final connectivityService = Get.find<ConnectivityService>();
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
@@ -78,77 +80,91 @@ class AddStudentScreenState extends State<AddStudentScreen> {
           title: const Text('Öğrenci Ekle'),
         ),
         drawer: const CustomDrawer(),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Obx(
-            () => Form(
-              key: _formKey,
-              child: ListView(
-                children: [
-                  CustomTextFormField(
-                    labelText: 'Name',
-                    controller: controller.nameController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Lütfen ismi girin';
-                      }
-                      return null;
-                    },
+        body: Obx(
+          () => Form(
+            key: _formKey,
+            child: ListView(
+              children: [
+                if (connectivityService.isConnected.value == false)
+                  Container(
+                    width: double.infinity,
+                    color: Colors.red,
+                    padding: const EdgeInsets.all(8.0),
+                    child: const Text(
+                      'İnternet bağlantısı yok',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  CustomTextFormField(
-                    labelText: 'TC',
-                    controller: controller.tcController,
-                    input: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Lütfen TC girin';
-                      }
-                      return null;
-                    },
-                  ),
-                  CustomTextFormField(
-                    labelText: 'Öğrenci Numarası',
-                    controller: controller.studentNumberController,
-                    input: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Lütfen öğrenci numarası girin';
-                      }
-                      return null;
-                    },
-                  ),
-                  CustomTextFormField(
-                    labelText: 'Telefon Numarası',
-                    controller: controller.phoneNumberController,
-                    input: TextInputType.phone,
-                    inputFormatters: [phoneMaskFormatter],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Lütfen telefon numarasını girin';
-                      }
-                      return null;
-                    },
-                  ),
-                  CustomTextFormField(
-                    labelText: 'Bölüm',
-                    controller: controller.departmentController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Lütfen bölümü girin';
-                      }
-                      return null;
-                    },
-                  ),
-                  CheckboxListTile(
-                    title: const Text('IBAN'),
-                    value: controller.ibanChecked.value,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        controller.ibanChecked.value = value ?? false;
-                      });
-                    },
-                  ),
-                  ElevatedButton(
+                CustomTextFormField(
+                  labelText: 'Ad Soyad',
+                  controller: controller.nameController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Lütfen ad soyad girin';
+                    }
+                    return null;
+                  },
+                ),
+                CustomTextFormField(
+                  labelText: 'TC',
+                  controller: controller.tcController,
+                  input: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Lütfen TC girin';
+                    }
+                    return null;
+                  },
+                ),
+                CustomTextFormField(
+                  labelText: 'Öğrenci Numarası',
+                  controller: controller.studentNumberController,
+                  input: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Lütfen öğrenci numarası girin';
+                    }
+                    return null;
+                  },
+                ),
+                CustomTextFormField(
+                  labelText: 'Telefon Numarası',
+                  controller: controller.phoneNumberController,
+                  input: TextInputType.phone,
+                  inputFormatters: [phoneMaskFormatter],
+                  hintText: '5xx xxx xx xx',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Lütfen telefon numarasını girin';
+                    }
+                    return null;
+                  },
+                ),
+                CustomTextFormField(
+                  labelText: 'Bölüm',
+                  controller: controller.departmentController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Lütfen bölümü girin';
+                    }
+                    return null;
+                  },
+                ),
+                CheckboxListTile(
+                  title: const Text('IBAN'),
+                  value: controller.ibanChecked.value,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      controller.ibanChecked.value = value ?? false;
+                    });
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: ElevatedButton(
                     onPressed: () async {
                       // Ask for permissions
                       Permission.camera.request().then((status) {
@@ -184,14 +200,17 @@ class AddStudentScreenState extends State<AddStudentScreen> {
                     },
                     child: const Text('Öğrenci Kartı Tara'),
                   ),
-                  widget.googleSheetsController.addLoading.value
-                      ? const Center(child: CircularProgressIndicator())
-                      : ElevatedButton(
+                ),
+                widget.googleSheetsController.addLoading.value
+                    ? const Center(child: CircularProgressIndicator())
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: ElevatedButton(
                           onPressed: _submitForm,
                           child: const Text('Ekle'),
                         ),
-                ],
-              ),
+                      ),
+              ],
             ),
           ),
         ));

@@ -3,6 +3,18 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+extension StringExtensions on String {
+  String removeSpaces() {
+    // Remove all spaces from the text
+    return replaceAll(RegExp(r'\s+'), '');
+  }
+
+  String removeNonDigits() {
+    // Remove all non-digit characters from the text
+    return replaceAll(RegExp(r'\D'), '');
+  }
+}
+
 class AddStudentController extends GetxController {
   final nameController = TextEditingController();
   final tcController = TextEditingController();
@@ -12,11 +24,18 @@ class AddStudentController extends GetxController {
   final ibanChecked = false.obs;
 
   void extractText(String text) {
+    //error handling
+    if (text.isEmpty) {
+      log("Text is empty");
+      return;
+    }
     // Split the text into a list of strings
     List<String> texts = text.split('\n').map((e) => e.trim()).toList();
 
+    //TODO add logging for debug
+
     // Define regular expressions for each piece of information
-    final tcPattern = RegExp(r'kimlik|TC|TRID', caseSensitive: false);
+    final tcPattern = RegExp(r'kimlik ?no|TC|TRID|TR ID', caseSensitive: false);
     final namePattern = RegExp(r'soyad|Soyad|Name\s*Surname', caseSensitive: false);
     final studentIdPattern = RegExp(r'Öğrenci\s*no|student\s*ID', caseSensitive: false);
     final departmentPattern = RegExp(r'Bölüm|department', caseSensitive: false);
@@ -30,7 +49,7 @@ class AddStudentController extends GetxController {
     // Find and assign the TC Kimlik No
     var index = texts.indexWhere((element) => tcPattern.hasMatch(element));
     if (index != -1 && index + 1 < texts.length) {
-      tcKimlikNo = texts[index + 1];
+      tcKimlikNo = texts[index + 1].removeSpaces().removeNonDigits();
     }
 
     // Find and assign the Name/Surname
@@ -48,9 +67,9 @@ class AddStudentController extends GetxController {
     }
 
     if (matches.length >= 2) {
-      studentId = texts[matches[1] + 1];
+      studentId = texts[matches[1] + 1].removeSpaces();
     } else if (matches.length == 1) {
-      studentId = texts[matches[0] + 1];
+      studentId = texts[matches[0] + 1].removeSpaces();
     }
 
     // Find and assign the Department
