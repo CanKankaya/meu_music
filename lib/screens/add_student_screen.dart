@@ -42,15 +42,6 @@ class AddStudentScreenState extends State<AddStudentScreen> {
       ]);
 
       if (result == null) {
-        // Show success message
-        Get.snackbar(
-          'Başarılı',
-          'Öğrenci başarıyla eklendi',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-
         // Clear form fields
         controller.nameController.clear();
         controller.tcController.clear();
@@ -60,6 +51,68 @@ class AddStudentScreenState extends State<AddStudentScreen> {
         setState(() {
           controller.ibanChecked.value = false;
         });
+
+        // Show success message with QR button
+        Get.snackbar(
+          'Başarılı',
+          'Öğrenci başarıyla eklendi',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          mainButton: TextButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return Dialog(
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          //TODO Change with whatsapp qr code
+                          Image.asset(
+                            'assets/images/discord_qr.png',
+                            fit: BoxFit.contain,
+                            width: double.infinity,
+                          ),
+                          const SizedBox(height: 8.0),
+                          const Text(
+                            'Whatsapp grubumuza katılmak için QR kodunu taratabilirsiniz.',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16.0),
+                          Row(
+                            children: [
+                              const Spacer(),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Kapat'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+            child: const Text(
+              'QR Kodu Göster',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        );
       } else {
         // Show error message
         Get.snackbar(
@@ -199,7 +252,10 @@ class AddStudentScreenState extends State<AddStudentScreen> {
                       });
                     },
                     icon: const Icon(Icons.camera_alt),
-                    label: const Text('Öğrenci Kartı Tara'),
+                    label: const Text(
+                      'Öğrenci Kartı Tara',
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ),
                 ),
                 widget.googleSheetsController.addLoading.value
@@ -208,7 +264,10 @@ class AddStudentScreenState extends State<AddStudentScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: ElevatedButton(
                           onPressed: _submitForm,
-                          child: const Text('Ekle'),
+                          child: const Text(
+                            'Ekle',
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
               ],

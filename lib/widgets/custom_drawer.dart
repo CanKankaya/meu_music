@@ -82,7 +82,8 @@ class DrawerItem {
 final List<DrawerItem> screensInDrawer = [
   DrawerItem(dTitle: "Ana Sayfa", dRoute: "/home", icon: Icons.home),
   DrawerItem(dTitle: "Öğrenci Ekle", dRoute: "/add-student", icon: Icons.person_add),
-  // DrawerItem(dTitle: "Cihaz Ayarlarım", dRoute: "/device-settings", icon: Icons.devices),
+  DrawerItem(dTitle: "Discord QR", dRoute: "/dc_qr", iconAsset: 'assets/icons/discord_icon.png'),
+  DrawerItem(dTitle: "Whatsapp QR", dRoute: "/wp_qr", iconAsset: 'assets/icons/whatsapp_icon.png'),
   // DrawerItem(dTitle: "Cihaz Raporlarım", dRoute: "/device_reports", icon: Icons.description),
   // DrawerItem(
   //     dTitle: "Cihaz İhlal Raporlarım", dRoute: "/device_violation_reports", icon: Icons.warning),

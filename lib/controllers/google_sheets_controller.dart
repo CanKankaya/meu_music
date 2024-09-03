@@ -194,12 +194,13 @@ class GoogleSheetsController extends GetxController {
     loading(false);
   }
 
-  Future<void> addDebugLog(String tc, String name, String studentId, String department) async {
+  Future<void> addDebugLog(
+      String tc, String name, String studentId, String department, String fullText) async {
     final logDate = DateFormat('dd.MM.yyyy').format(DateTime.now());
     try {
       final sheetsApi = await _getSheetsApi();
       final values = [
-        [logDate, tc, name, studentId, department]
+        [logDate, tc, name, studentId, department, fullText]
       ];
       final valueRange = ValueRange(values: values);
       await sheetsApi.spreadsheets.values

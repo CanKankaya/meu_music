@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
+
 import 'package:meu_music/controllers/google_sheets_controller.dart';
 import 'package:meu_music/screens/add_student_screen.dart';
+import 'package:meu_music/screens/dc_qr_screen.dart';
 import 'package:meu_music/screens/home_screen.dart';
 import 'package:meu_music/screens/text_scanner_screen.dart';
+import 'package:meu_music/screens/wp_qr_screen.dart';
 
 import 'settings/settings_controller.dart';
 
@@ -81,6 +85,14 @@ class MyApp extends StatelessWidget {
             GetPage(
               name: TextScannerScreen.routeName,
               page: () => const TextScannerScreen(),
+            ),
+            GetPage(
+              name: DcQrScreen.routeName,
+              page: () => const DcQrScreen(),
+            ),
+            GetPage(
+              name: WpQrScreen.routeName,
+              page: () => const WpQrScreen(),
             ),
           ],
         );

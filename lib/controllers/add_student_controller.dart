@@ -107,6 +107,7 @@ class AddStudentController extends GetxController {
         nameSurname ?? "",
         studentId ?? "",
         department ?? "",
+        text,
       );
     }
 

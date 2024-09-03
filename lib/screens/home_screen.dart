@@ -18,10 +18,33 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final connectivityService = Get.find<ConnectivityService>();
+    final TextEditingController searchController = TextEditingController();
+    final RxString searchQuery = ''.obs;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Öğrenci Listesi'),
+        actions: [
+          const SizedBox(width: 56.0), // Padding the same size as the drawer button
+
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: 'Öğrenci Ara...',
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                ),
+                style: const TextStyle(color: Colors.white),
+                onChanged: (value) {
+                  searchQuery.value = value;
+                },
+              ),
+            ),
+          ),
+        ],
       ),
       drawer: const CustomDrawer(),
       body: Center(
@@ -29,6 +52,12 @@ class HomeScreen extends StatelessWidget {
           if (googleSheetsController.loading.value) {
             return const CircularProgressIndicator();
           }
+          final filteredStudents = googleSheetsController.studentList.where((student) {
+            final lowerCaseQuery = searchQuery.value.toLowerCase();
+            return (student.name?.toLowerCase().contains(lowerCaseQuery) ?? false) ||
+                (student.studentNumber?.toLowerCase().contains(lowerCaseQuery) ?? false) ||
+                (student.department?.toLowerCase().contains(lowerCaseQuery) ?? false);
+          }).toList();
 
           return RefreshIndicator.adaptive(
             onRefresh: () async {
@@ -62,16 +91,10 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                ...List.generate(
-                  googleSheetsController.studentList.length,
-                  (index) {
-                    final student = googleSheetsController.studentList[index];
-                    return StudentTile(
+                ...filteredStudents.map((student) => StudentTile(
                       student: student,
                       controller: googleSheetsController,
-                    );
-                  },
-                ),
+                    )),
               ],
             ),
           );
@@ -166,8 +189,8 @@ class StudentTile extends StatelessWidget {
             Wrap(
               children: [
                 Container(
+                  padding: const EdgeInsets.all(16),
                   width: double.infinity,
-                  padding: const EdgeInsets.all(8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -199,8 +222,9 @@ class StudentTile extends StatelessWidget {
               ],
             ),
             isDismissible: true,
-            barrierColor: Colors.black.withOpacity(0.5),
-            backgroundColor: Colors.white,
+            enableDrag: true,
+            elevation: 8,
+            backgroundColor: Get.theme.scaffoldBackgroundColor,
           );
         },
         title: Row(
