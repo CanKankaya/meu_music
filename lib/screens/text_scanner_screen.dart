@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:meu_music/widgets/custom_clipper.dart';
 import 'package:meu_music/widgets/simpler_custom_loading.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -31,6 +33,10 @@ class _TextScannerScreenState extends State<TextScannerScreen> with WidgetsBindi
   @override
   void initState() {
     super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     //To display camera feed we need to add WidgetsBindingObserver.
     WidgetsBinding.instance.addObserver(this);
     future = requestCameraPermission();
@@ -41,6 +47,12 @@ class _TextScannerScreenState extends State<TextScannerScreen> with WidgetsBindi
     WidgetsBinding.instance.removeObserver(this);
     stopCamera();
     textRecogniser.close();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
     super.dispose();
   }
 
@@ -76,6 +88,7 @@ class _TextScannerScreenState extends State<TextScannerScreen> with WidgetsBindi
                   return Stack(
                     children: [
                       SizedBox(child: CameraPreview(cameraController!)),
+                      const OverlayWithRectangleClipping(),
                       Positioned(
                         left: 0,
                         right: 0,
