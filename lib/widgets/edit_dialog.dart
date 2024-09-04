@@ -95,9 +95,17 @@ class EditDialogState extends State<EditDialog> {
                       widget.student.department = _departmentController.text;
 
                       // Call update function here if needed
-                      await googleSheetsController.editStudents([widget.student]);
-
+                      final result = await googleSheetsController.editStudents([widget.student]);
                       Get.back(result: true);
+                      if (result != null) {
+                        Get.snackbar(
+                          'Hata',
+                          'Öğrenci düzenlenirken bir hata oluştu',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                        );
+                      }
                     },
               child: googleSheetsController.editLoading.value
                   ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator())

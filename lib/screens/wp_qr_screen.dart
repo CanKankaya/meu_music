@@ -43,6 +43,10 @@ class _WpQrScreenState extends State<WpQrScreen> {
       body: Column(
         children: [
           const Spacer(),
+          const Text(
+            '(Geçici olarak burda da discord qr kodu var, yeni whatsapp grubu kurulduğunda değiştirilecek)',
+            textAlign: TextAlign.center,
+          ),
           Image.asset(
             //TODO Change with whatsapp qr code
             'assets/images/discord_qr.png',

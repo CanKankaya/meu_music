@@ -118,7 +118,7 @@ class GoogleSheetsController extends GetxController {
     studentList.addAll(students);
   }
 
-  Future<void> editStudents(List<Student> students) async {
+  Future<String?> editStudents(List<Student> students) async {
     editLoading(true);
     try {
       final sheetsApi = await _getSheetsApi();
@@ -147,9 +147,12 @@ class GoogleSheetsController extends GetxController {
       //* Edit Locally if successful
       editStudentsLocal(students);
       log('Edited students: $students');
-      editLoading(false);
+      return null;
     } catch (e) {
       log(e.toString());
+      return 'Bir hata oluştu. Lütfen tekrar deneyin.';
+    } finally {
+      editLoading(false);
     }
   }
 
@@ -161,7 +164,7 @@ class GoogleSheetsController extends GetxController {
     }
   }
 
-  Future<void> deleteStudents(List<int> rowNumbers) async {
+  Future<String?> deleteStudents(List<int> rowNumbers) async {
     try {
       final sheetsApi = await _getSheetsApi();
       final requests = <Request>[];
@@ -188,8 +191,11 @@ class GoogleSheetsController extends GetxController {
 
       //* Delete Locally if successful
       deleteStudentsLocal(rowNumbers);
+      log('Deleted students: $rowNumbers');
+      return null;
     } catch (e) {
       log(e.toString());
+      return 'Bir hata oluştu. Lütfen tekrar deneyin.';
     }
   }
 
