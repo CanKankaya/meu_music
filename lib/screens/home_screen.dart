@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:meu_music/constants/sheet_ids.dart';
@@ -20,6 +22,7 @@ class HomeScreen extends StatelessWidget {
     final connectivityService = Get.find<ConnectivityService>();
     final TextEditingController searchController = TextEditingController();
     final RxString searchQuery = ''.obs;
+    final ValueNotifier<int> deletingIndex = ValueNotifier<int>(-1);
 
     return Scaffold(
       appBar: AppBar(
@@ -29,15 +32,17 @@ class HomeScreen extends StatelessWidget {
 
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.only(top: 8.0),
               child: TextField(
                 controller: searchController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.only(bottom: 8),
+                    child: Icon(Icons.search),
+                  ),
                   hintText: 'Öğrenci Ara...',
                   border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
                 ),
-                style: const TextStyle(color: Colors.white),
                 onChanged: (value) {
                   searchQuery.value = value;
                 },
@@ -91,10 +96,194 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                ...filteredStudents.map((student) => StudentTile(
-                      student: student,
-                      controller: googleSheetsController,
-                    )),
+                ...filteredStudents.map((student) => ValueListenableBuilder(
+                    valueListenable: deletingIndex,
+                    builder: (context, value, child) {
+                      return Dismissible(
+                        key: UniqueKey(),
+                        direction: DismissDirection.horizontal,
+                        confirmDismiss: (direction) async {
+                          if (direction == DismissDirection.endToStart) {
+                            // Handle delete
+                            final bool? confirmDelete = await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Silme İşlemini Onayla'),
+                                  content: const Text(
+                                    'Bu öğrenciyi silmek istediğinizden emin misiniz?',
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () => Get.back(result: false),
+                                      child: const Text('İptal'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Get.back(result: true),
+                                      child: const Text('Sil'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            if (confirmDelete == true) {
+                              deletingIndex.value =
+                                  googleSheetsController.studentList.indexOf(student);
+                              await googleSheetsController
+                                  .deleteStudents([student.rowNumber!]).then((value) {
+                                deletingIndex.value = -1;
+                              });
+                              return true;
+                            } else {
+                              return false;
+                            }
+                          } else if (direction == DismissDirection.startToEnd) {
+                            // Handle edit
+                            await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return EditDialog(student: student);
+                              },
+                            );
+
+                            return false;
+                          }
+                          return false;
+                        },
+                        secondaryBackground: ClipRRect(
+                          borderRadius: BorderRadius.circular(10.0),
+                          child: Container(
+                            color: Colors.red,
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: const Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                          ),
+                        ),
+                        background: ClipRRect(
+                          borderRadius: BorderRadius.circular(10.0),
+                          child: Container(
+                            color: Colors.green,
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: const Icon(
+                              Icons.edit,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                          ),
+                        ),
+                        child: Stack(
+                          children: [
+                            ListTile(
+                              onTap: () {
+                                Get.bottomSheet(
+                                  Wrap(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(16),
+                                        width: double.infinity,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                  'İsim/Soyisim: ${student.name ?? 'İsimsiz'}'),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Text('T.C: ${student.tc ?? 'TC Yok'}'),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                  'Öğrenci Numarası: ${student.studentNumber ?? 'Öğrenci Numarası Yok'}'),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                  'Telefon Numarası: ${student.phoneNumber ?? 'Telefon Numarası Yok'}'),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                  'Bölüm: ${student.department ?? 'Bölüm Yok'}'),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  isDismissible: true,
+                                  enableDrag: true,
+                                  elevation: 8,
+                                  backgroundColor: Get.theme.scaffoldBackgroundColor,
+                                );
+                              },
+                              title: Row(
+                                children: [
+                                  Text(student.rowNumber.toString(),
+                                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  const SizedBox(width: 16),
+                                  Text(student.name ?? 'İsimsiz'),
+                                ],
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  Get.defaultDialog(
+                                    contentPadding: const EdgeInsets.all(16),
+                                    title: 'Öğrenciyi Sil',
+                                    middleText: 'Bu öğrenciyi silmek istediğinize emin misiniz?',
+                                    textConfirm: 'Sil',
+                                    textCancel: 'İptal',
+                                    onConfirm: () {
+                                      if (student.rowNumber != null) {
+                                        googleSheetsController.deleteStudents([student.rowNumber!]);
+                                        Get.back();
+                                      } else {
+                                        Get.back();
+                                        Get.snackbar('Hata', 'Öğrenci bulunamadı');
+                                      }
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                            if (deletingIndex.value ==
+                                googleSheetsController.studentList.indexOf(student))
+                              Positioned.fill(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: BackdropFilter(
+                                    filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                                    child: const Center(
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Siliniyor',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                          SizedBox(width: 20),
+                                          CircularProgressIndicator(),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    })),
               ],
             ),
           );

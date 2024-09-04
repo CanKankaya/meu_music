@@ -162,7 +162,6 @@ class GoogleSheetsController extends GetxController {
   }
 
   Future<void> deleteStudents(List<int> rowNumbers) async {
-    loading(true);
     try {
       final sheetsApi = await _getSheetsApi();
       final requests = <Request>[];
@@ -187,11 +186,29 @@ class GoogleSheetsController extends GetxController {
         await sheetsApi.spreadsheets.batchUpdate(batchUpdateRequest, spreadsheetId);
       }
 
-      fetchStudents(spreadsheetId, fullHeaderRange);
+      //* Delete Locally if successful
+      deleteStudentsLocal(rowNumbers);
     } catch (e) {
       log(e.toString());
     }
-    loading(false);
+  }
+
+  void deleteStudentsLocal(List<int> rowNumbers) {
+    // Sort the rowNumbers in descending order to avoid index shifting issues
+    rowNumbers.sort((a, b) => b.compareTo(a));
+
+    for (var rowNumber in rowNumbers) {
+      studentList.removeWhere((student) => student.rowNumber == rowNumber);
+    }
+
+    // Adjust the rowNumber of the remaining students
+    for (var student in studentList) {
+      for (var rowNumber in rowNumbers) {
+        if (student.rowNumber! > rowNumber) {
+          student.rowNumber = student.rowNumber! - 1;
+        }
+      }
+    }
   }
 
   Future<void> addDebugLog(
