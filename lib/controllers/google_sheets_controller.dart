@@ -33,6 +33,62 @@ class GoogleSheetsController extends GetxController {
   var addLoading = false.obs;
   var studentList = <Student>[].obs;
 
+  var currentPage = 1.obs;
+  var itemsPerPage = 100;
+
+  var searchQuery = ''.obs;
+
+  List<Student> get filteredStudentList {
+    final lowerCaseQuery = searchQuery.value.toLowerCase().replaceAll(' ', '');
+    return studentList.where((student) {
+      final nameMatches = student.name?.toLowerCase().contains(lowerCaseQuery) ?? false;
+      final studentNumberMatches =
+          student.studentNumber?.toLowerCase().contains(lowerCaseQuery) ?? false;
+      final departmentMatches = student.department?.toLowerCase().contains(lowerCaseQuery) ?? false;
+      final phoneNumberMatches =
+          student.phoneNumber?.replaceAll(' ', '').contains(lowerCaseQuery) ?? false;
+
+      return nameMatches || studentNumberMatches || departmentMatches || phoneNumberMatches;
+    }).toList();
+  }
+
+  List<Student> get paginatedStudentList {
+    final filteredStudents = filteredStudentList;
+    final startIndex = (currentPage.value - 1) * itemsPerPage;
+    final endIndex = startIndex + itemsPerPage;
+    return filteredStudents.sublist(
+      startIndex,
+      endIndex > filteredStudents.length ? filteredStudents.length : endIndex,
+    );
+  }
+
+  int get totalPages {
+    return (filteredStudentList.length / itemsPerPage).ceil();
+  }
+
+  void nextPage() {
+    if ((currentPage.value * itemsPerPage) < filteredStudentList.length) {
+      currentPage.value++;
+    }
+  }
+
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+    }
+  }
+
+  void goToPage(int page) {
+    if (page > 0 && (page - 1) * itemsPerPage < filteredStudentList.length) {
+      currentPage.value = page;
+    }
+  }
+
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+    currentPage.value = 1; // Reset to the first page
+  }
+
   @override
   void onInit() {
     fetchStudents(spreadsheetId, fullHeaderRange);
@@ -214,6 +270,9 @@ class GoogleSheetsController extends GetxController {
           student.rowNumber = student.rowNumber! - 1;
         }
       }
+    }
+    if (paginatedStudentList.isEmpty && currentPage.value > 1) {
+      previousPage();
     }
   }
 

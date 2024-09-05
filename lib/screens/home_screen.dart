@@ -16,12 +16,10 @@ class HomeScreen extends StatelessWidget {
 
   final GoogleSheetsController googleSheetsController;
 
-  //TODO Convert to Datatable
   @override
   Widget build(BuildContext context) {
     final connectivityService = Get.find<ConnectivityService>();
     final TextEditingController searchController = TextEditingController();
-    final RxString searchQuery = ''.obs;
     final ValueNotifier<int> deletingIndex = ValueNotifier<int>(-1);
 
     return Scaffold(
@@ -43,7 +41,7 @@ class HomeScreen extends StatelessWidget {
                   border: InputBorder.none,
                 ),
                 onChanged: (value) {
-                  searchQuery.value = value;
+                  googleSheetsController.updateSearchQuery(value);
                 },
               ),
             ),
@@ -56,12 +54,15 @@ class HomeScreen extends StatelessWidget {
           if (googleSheetsController.loading.value) {
             return const CircularProgressIndicator();
           }
-          final filteredStudents = googleSheetsController.studentList.where((student) {
-            final lowerCaseQuery = searchQuery.value.toLowerCase();
-            return (student.name?.toLowerCase().contains(lowerCaseQuery) ?? false) ||
-                (student.studentNumber?.toLowerCase().contains(lowerCaseQuery) ?? false) ||
-                (student.department?.toLowerCase().contains(lowerCaseQuery) ?? false);
-          }).toList();
+          // final filteredStudents = googleSheetsController.studentList.where((student) {
+          //   final lowerCaseQuery = searchQuery.value.toLowerCase();
+          //   return (student.name?.toLowerCase().contains(lowerCaseQuery) ?? false) ||
+          //       (student.studentNumber?.toLowerCase().contains(lowerCaseQuery) ?? false) ||
+          //       (student.department?.toLowerCase().contains(lowerCaseQuery) ?? false) ||
+          //       (student.phoneNumber?.toLowerCase().contains(lowerCaseQuery) ?? false);
+          // }).toList();
+
+          final pagedStudents = googleSheetsController.paginatedStudentList;
 
           return Column(
             children: [
@@ -98,13 +99,14 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                      ...filteredStudents.map(
+                      ...pagedStudents.map(
                         (student) => _buildStudentTile(deletingIndex, student),
                       ),
                     ],
                   ),
                 ),
               ),
+              _buildPageBar(),
             ],
           );
         }),
@@ -258,23 +260,44 @@ class HomeScreen extends StatelessWidget {
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      Get.defaultDialog(
-                        contentPadding: const EdgeInsets.all(16),
-                        title: 'Öğrenciyi Sil',
-                        middleText: 'Bu öğrenciyi silmek istediğinize emin misiniz?',
-                        textConfirm: 'Sil',
-                        textCancel: 'İptal',
-                        onConfirm: () {
-                          if (student.rowNumber != null) {
-                            googleSheetsController.deleteStudents([student.rowNumber!]);
-                            Get.back();
-                          } else {
-                            Get.back();
-                            Get.snackbar('Hata', 'Öğrenci bulunamadı');
-                          }
+                    onPressed: () async {
+                      final bool? confirmDelete = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Silme İşlemini Onayla'),
+                            content: const Text(
+                              'Bu öğrenciyi silmek istediğinizden emin misiniz?',
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () => Get.back(result: false),
+                                child: const Text('İptal'),
+                              ),
+                              TextButton(
+                                onPressed: () => Get.back(result: true),
+                                child: const Text('Sil'),
+                              ),
+                            ],
+                          );
                         },
                       );
+
+                      if (confirmDelete == true) {
+                        deletingIndex.value = googleSheetsController.studentList.indexOf(student);
+                        final result =
+                            await googleSheetsController.deleteStudents([student.rowNumber!]);
+                        deletingIndex.value = -1;
+                        if (result != null) {
+                          Get.snackbar(
+                            'Hata',
+                            'Öğrenci silinirken bir hata oluştu',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
+                        }
+                      }
                     },
                   ),
                 ),
@@ -306,5 +329,31 @@ class HomeScreen extends StatelessWidget {
             ),
           );
         });
+  }
+
+  //TODO add a dropdown to show how many items to show per page. Defaults to 100.
+  Widget _buildPageBar() {
+    return Obx(() {
+      final currentPage = googleSheetsController.currentPage.value;
+      final totalPages = googleSheetsController.totalPages;
+
+      return Container(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: currentPage > 1 ? googleSheetsController.previousPage : null,
+            ),
+            Text('Page $currentPage of $totalPages'),
+            IconButton(
+              icon: const Icon(Icons.arrow_forward),
+              onPressed: currentPage < totalPages ? googleSheetsController.nextPage : null,
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

@@ -3,18 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:meu_music/controllers/google_sheets_controller.dart';
-
-extension StringExtensions on String {
-  String removeSpaces() {
-    // Remove all spaces from the text
-    return replaceAll(RegExp(r'\s+'), '');
-  }
-
-  String removeNonDigits() {
-    // Remove all non-digit characters from the text
-    return replaceAll(RegExp(r'\D'), '');
-  }
-}
+import 'package:meu_music/services/text_helper.dart';
 
 class AddStudentController extends GetxController {
   final nameController = TextEditingController();
