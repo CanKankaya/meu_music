@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:meu_music/constants/sheet_ids.dart';
 import 'package:meu_music/controllers/google_sheets_controller.dart';
 import 'package:meu_music/models/student.dart';
 import 'package:meu_music/services/connectivity_service.dart';
@@ -15,6 +14,14 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, required this.googleSheetsController});
 
   final GoogleSheetsController googleSheetsController;
+
+  //TODO Add a new home screen that display general info like student count etc.
+
+  //TODO OPTIONAL: Integrate sayman raporu aswell
+
+  //TODO IMPORTANT: Convert the list to a table view in a pdf with appropriate number of pages and with only the required columns. This is required in 2nd semester, for the Topluluk defteri Teslimi.
+
+  //TODO Add Settings screen where the user can change the sheet id and instructions on how to get the sheet id and how to add the google service account to the sheet as an editor.
 
   @override
   Widget build(BuildContext context) {
@@ -54,14 +61,6 @@ class HomeScreen extends StatelessWidget {
           if (googleSheetsController.loading.value) {
             return const CircularProgressIndicator();
           }
-          // final filteredStudents = googleSheetsController.studentList.where((student) {
-          //   final lowerCaseQuery = searchQuery.value.toLowerCase();
-          //   return (student.name?.toLowerCase().contains(lowerCaseQuery) ?? false) ||
-          //       (student.studentNumber?.toLowerCase().contains(lowerCaseQuery) ?? false) ||
-          //       (student.department?.toLowerCase().contains(lowerCaseQuery) ?? false) ||
-          //       (student.phoneNumber?.toLowerCase().contains(lowerCaseQuery) ?? false);
-          // }).toList();
-
           final pagedStudents = googleSheetsController.paginatedStudentList;
 
           return Column(
@@ -82,8 +81,7 @@ class HomeScreen extends StatelessWidget {
               Expanded(
                 child: RefreshIndicator.adaptive(
                   onRefresh: () async {
-                    googleSheetsController.fetchStudents(
-                        apiTestSheetId, googleSheetsController.fullHeaderRange);
+                    googleSheetsController.fetchStudents(googleSheetsController.fullHeaderRange);
                   },
                   child: ListView(
                     children: [
@@ -219,25 +217,73 @@ class HomeScreen extends StatelessWidget {
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: Text('İsim/Soyisim: ${student.name ?? 'İsimsiz'}'),
+                                  child: Text.rich(
+                                    TextSpan(
+                                      text: 'İsim/Soyisim: ',
+                                      children: [
+                                        TextSpan(
+                                          text: student.name ?? 'İsimsiz',
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: Text('T.C: ${student.tc ?? 'TC Yok'}'),
+                                  child: Text.rich(
+                                    TextSpan(
+                                      text: 'T.C: ',
+                                      children: [
+                                        TextSpan(
+                                          text: student.tc ?? 'TC Yok',
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                      'Öğrenci Numarası: ${student.studentNumber ?? 'Öğrenci Numarası Yok'}'),
+                                  child: Text.rich(
+                                    TextSpan(
+                                      text: 'Öğrenci Numarası: ',
+                                      children: [
+                                        TextSpan(
+                                          text: student.studentNumber ?? 'Öğrenci Numarası Yok',
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                      'Telefon Numarası: ${student.phoneNumber ?? 'Telefon Numarası Yok'}'),
+                                  child: Text.rich(
+                                    TextSpan(
+                                      text: 'Telefon Numarası: ',
+                                      children: [
+                                        TextSpan(
+                                          text: student.phoneNumber ?? 'Telefon Numarası Yok',
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: Text('Bölüm: ${student.department ?? 'Bölüm Yok'}'),
+                                  child: Text.rich(
+                                    TextSpan(
+                                      text: 'Bölüm: ',
+                                      children: [
+                                        TextSpan(
+                                          text: student.department ?? 'Bölüm Yok',
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -342,14 +388,30 @@ class HomeScreen extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: currentPage > 1 ? googleSheetsController.previousPage : null,
+            InkWell(
+              onTap: currentPage > 1 ? googleSheetsController.previousPage : null,
+              borderRadius: BorderRadius.circular(8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Icon(
+                  Icons.arrow_back_ios_new,
+                  color: currentPage > 1 ? null : Colors.grey,
+                ),
+              ),
             ),
-            Text('Page $currentPage of $totalPages'),
-            IconButton(
-              icon: const Icon(Icons.arrow_forward),
-              onPressed: currentPage < totalPages ? googleSheetsController.nextPage : null,
+            const Spacer(),
+            Text('Sayfa $currentPage / $totalPages'),
+            const Spacer(),
+            InkWell(
+              onTap: currentPage < totalPages ? googleSheetsController.nextPage : null,
+              borderRadius: BorderRadius.circular(8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Icon(
+                  Icons.arrow_forward_ios,
+                  color: currentPage < totalPages ? null : Colors.grey,
+                ),
+              ),
             ),
           ],
         ),

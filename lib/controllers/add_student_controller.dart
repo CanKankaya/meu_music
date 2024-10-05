@@ -11,7 +11,8 @@ class AddStudentController extends GetxController {
   final studentNumberController = TextEditingController();
   final phoneNumberController = TextEditingController();
   final departmentController = TextEditingController();
-  final ibanChecked = false.obs;
+
+  //TODO Student ID fix, tcno fix
 
   void extractText(String text) async {
     //error handling

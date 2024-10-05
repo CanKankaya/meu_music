@@ -5,12 +5,12 @@ import 'package:googleapis/sheets/v4.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:intl/intl.dart';
 import 'package:meu_music/constants/private.dart';
-import 'package:meu_music/constants/sheet_ids.dart';
 import 'package:meu_music/models/student.dart';
+import 'package:meu_music/services/text_helper.dart';
 
 class GoogleSheetsController extends GetxController {
   final _scopes = [SheetsApi.spreadsheetsScope];
-  final spreadsheetId = apiTestSheetId;
+  final spreadsheetId = realSheetId20242025;
   final _credentials = {
     "type": "service_account",
     "project_id": "meumusic",
@@ -91,7 +91,7 @@ class GoogleSheetsController extends GetxController {
 
   @override
   void onInit() {
-    fetchStudents(spreadsheetId, fullHeaderRange);
+    fetchStudents(fullHeaderRange);
     super.onInit();
   }
 
@@ -101,7 +101,8 @@ class GoogleSheetsController extends GetxController {
     return SheetsApi(authClient);
   }
 
-  Future<void> fetchStudents(String spreadsheetId, String range) async {
+  //TODO Logic check for "BAHAR DÖNEMİ", "GÜZ DÖNEMİ" etc.
+  Future<void> fetchStudents(String range) async {
     loading(true);
     try {
       final sheetsApi = await _getSheetsApi();
@@ -119,7 +120,6 @@ class GoogleSheetsController extends GetxController {
         final index = values.indexOf(row) + 1; // +1 to account for header row
         return Student.fromList(rowData, index: index);
       }).toList();
-
       studentList.assignAll(fetchedStudents);
 
       log('Fetched students from sheet');
@@ -133,32 +133,44 @@ class GoogleSheetsController extends GetxController {
     addLoading(true);
     try {
       final sheetsApi = await _getSheetsApi();
+
       final values = students
           .map((student) => [
-                student.name,
+                student.name.capitalizeFirstLetterOfEachWord(),
                 student.tc,
                 student.studentNumber,
                 student.phoneNumber,
-                student.department,
-                student.iban,
-                student.optionalField,
+                student.department.capitalizeFirstLetterOfEachWord(),
+                student.payment ?? 'Ödeme Yapmadı',
                 student.addedDate != null
                     ? DateFormat('dd.MM.yyyy').format(student.addedDate!)
                     : null,
+                student.optionalField,
               ])
           .toList();
-      final valueRange = ValueRange(values: values);
-      await sheetsApi.spreadsheets.values
-          .append(valueRange, spreadsheetId, fullHeaderRange, valueInputOption: 'RAW');
 
-      //*Add Locally if successful
+      // Debug log to verify the values being appended
+      log('Appending values: $values');
+
+      final valueRange = ValueRange(values: values);
+      final response = await sheetsApi.spreadsheets.values.append(
+        valueRange,
+        spreadsheetId,
+        fullHeaderRange,
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+      );
+
+      // Debug log to verify the response from the API
+      log('Append response: ${response.toJson()}');
+
+      // Add Locally if successful
       addStudentsLocal(students);
       log('Added students: $students');
 
       return null;
     } catch (e) {
       log(e.toString());
-
       return 'Bir hata oluştu. Lütfen tekrar deneyin.';
     } finally {
       addLoading(false);
@@ -170,6 +182,10 @@ class GoogleSheetsController extends GetxController {
       log(students.length.toString());
       student.rowNumber = studentList.length + 1 + excelOffset;
       log(student.rowNumber.toString());
+
+      // Capitalize the first letter of each word in the name and department
+      student.name = student.name?.capitalizeFirstLetterOfEachWord();
+      student.department = student.department?.capitalizeFirstLetterOfEachWord();
     }
     studentList.addAll(students);
   }
@@ -188,7 +204,7 @@ class GoogleSheetsController extends GetxController {
               student.studentNumber,
               student.phoneNumber,
               student.department,
-              student.iban,
+              student.payment,
               student.optionalField,
               student.addedDate != null
                   ? '${student.addedDate!.day.toString().padLeft(2, '0')}.${student.addedDate!.month.toString().padLeft(2, '0')}.${student.addedDate!.year}'

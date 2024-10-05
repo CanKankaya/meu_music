@@ -7,7 +7,7 @@ class Student {
   String? studentNumber;
   String? phoneNumber;
   String? department;
-  String? iban;
+  String? payment;
   String? optionalField;
   DateTime? addedDate;
 
@@ -18,7 +18,7 @@ class Student {
     this.studentNumber,
     this.phoneNumber,
     this.department,
-    this.iban,
+    this.payment,
     this.optionalField,
     this.addedDate,
   });
@@ -42,7 +42,7 @@ class Student {
       studentNumber: data[2],
       phoneNumber: data[3],
       department: data[4],
-      iban: data[5],
+      payment: data[5],
       optionalField: data[6],
       addedDate: parseDate(data[7]),
     );
@@ -50,6 +50,6 @@ class Student {
 
   @override
   String toString() {
-    return 'Student{rowNumber: $rowNumber, name: $name, tc: $tc, studentNumber: $studentNumber, phoneNumber: $phoneNumber, department: $department, iban: $iban, optionalField: $optionalField, addedDate: $addedDate}';
+    return 'Student{rowNumber: $rowNumber, name: $name, tc: $tc, studentNumber: $studentNumber, phoneNumber: $phoneNumber, department: $department, iban: $payment, optionalField: $optionalField, addedDate: $addedDate}';
   }
 }

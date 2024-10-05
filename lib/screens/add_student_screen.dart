@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:meu_music/constants/private.dart';
 import 'package:meu_music/controllers/add_student_controller.dart';
 import 'package:meu_music/controllers/google_sheets_controller.dart';
 import 'package:meu_music/models/student.dart';
@@ -20,10 +21,18 @@ class AddStudentScreen extends StatefulWidget {
   AddStudentScreenState createState() => AddStudentScreenState();
 }
 
+//TODO Make the payment option required
+
+//TODO Validation check for student ID, TC no (Digits only)
+
+//TODO Change IBAN and its QR to correct account
+
 class AddStudentScreenState extends State<AddStudentScreen> {
   final _formKey = GlobalKey<FormState>();
   final AddStudentController controller = Get.put(AddStudentController());
   final connectivityService = Get.find<ConnectivityService>();
+
+  String? selectedPayment;
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
@@ -36,7 +45,7 @@ class AddStudentScreenState extends State<AddStudentScreen> {
           studentNumber: controller.studentNumberController.text,
           phoneNumber: controller.phoneNumberController.text,
           department: controller.departmentController.text,
-          iban: controller.ibanChecked.value ? "Iban" : null,
+          payment: selectedPayment ?? 'Ödeme Yapmadı',
           addedDate: DateTime.now(),
         )
       ]);
@@ -49,7 +58,7 @@ class AddStudentScreenState extends State<AddStudentScreen> {
         controller.phoneNumberController.clear();
         controller.departmentController.clear();
         setState(() {
-          controller.ibanChecked.value = false;
+          selectedPayment = null;
         });
 
         // Show success message with QR button
@@ -70,9 +79,8 @@ class AddStudentScreenState extends State<AddStudentScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          //TODO Change with whatsapp qr code
                           Image.asset(
-                            'assets/images/discord_qr.png',
+                            'assets/images/whatsapp_qr.png',
                             fit: BoxFit.contain,
                             width: double.infinity,
                           ),
@@ -206,14 +214,76 @@ class AddStudentScreenState extends State<AddStudentScreen> {
                     return null;
                   },
                 ),
-                CheckboxListTile(
-                  title: const Text('IBAN'),
-                  value: controller.ibanChecked.value,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      controller.ibanChecked.value = value ?? false;
-                    });
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    children: [
+                      const Text('Ödeme:', style: TextStyle(fontSize: 16)),
+                      const SizedBox(width: 16),
+                      _buildPaymentOption('Iban'),
+                      const SizedBox(width: 16),
+                      _buildPaymentOption('Nakit'),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Dialog(
+                          insetPadding: const EdgeInsets.all(16.0),
+                          child: Container(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Image.asset(
+                                  'assets/images/iban_qr.jpeg',
+                                  fit: BoxFit.contain,
+                                  width: double.infinity,
+                                ),
+                                const SizedBox(height: 8.0),
+                                const Text(
+                                  ibanName,
+                                  style: TextStyle(
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 16.0),
+                                const Text(
+                                  iban,
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                  ),
+                                ),
+                                const SizedBox(height: 16.0),
+                                Row(
+                                  children: [
+                                    const Spacer(),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('Kapat'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
                   },
+                  child: const Text(
+                    'IBAN Göster',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -274,5 +344,40 @@ class AddStudentScreenState extends State<AddStudentScreen> {
             ),
           ),
         ));
+  }
+
+  Widget _buildPaymentOption(String paymentType) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            if (selectedPayment == paymentType) {
+              selectedPayment = null;
+            } else {
+              selectedPayment = paymentType;
+            }
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: selectedPayment == paymentType ? Colors.blue : Colors.grey,
+              width: 3.0, // Make the border bigger
+            ),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Center(
+            child: Text(
+              paymentType,
+              style: TextStyle(
+                color: selectedPayment == paymentType ? Colors.blue : Colors.grey,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
