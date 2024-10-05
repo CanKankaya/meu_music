@@ -25,6 +25,7 @@ class AddStudentController extends GetxController {
 
     // Define regular expressions for each piece of information
     final tcPattern = RegExp(r'kimlik ?no|TC|TRID|TR ID', caseSensitive: false);
+    final tcPattern2 = RegExp(r'Fakülte|Yüksekokul|Faculty|School', caseSensitive: false);
     final namePattern = RegExp(r'soyad|Soyad|Name\s*Surname', caseSensitive: false);
     final studentIdPattern = RegExp(r'Öğrenci\s*no|student\s*ID', caseSensitive: false);
     final departmentPattern = RegExp(r'Bölüm|department', caseSensitive: false);
@@ -41,6 +42,20 @@ class AddStudentController extends GetxController {
       tcKimlikNo = texts[index + 1].removeSpaces().removeNonDigits();
     }
 
+    // Second chance to find TC Kimlik No
+    if (tcKimlikNo == null || tcKimlikNo.isEmpty) {
+      index = texts.indexWhere((element) => tcPattern2.hasMatch(element));
+      if (index != -1) {
+        for (int i = index + 1; i < texts.length; i++) {
+          String cleanedText = texts[i].removeSpaces().removeNonDigits();
+          if (cleanedText.isNotEmpty && RegExp(r'^\d+$').hasMatch(cleanedText)) {
+            tcKimlikNo = cleanedText;
+            break;
+          }
+        }
+      }
+    }
+
     // Find and assign the Name/Surname
     index = texts.indexWhere((element) => namePattern.hasMatch(element));
     if (index != -1 && index + 1 < texts.length) {
@@ -48,17 +63,22 @@ class AddStudentController extends GetxController {
     }
 
     // Find and assign the Student ID
-    List<int> matches = [];
+    List<int> studentIdMatches = [];
     for (int i = 0; i < texts.length; i++) {
       if (studentIdPattern.hasMatch(texts[i])) {
-        matches.add(i);
+        studentIdMatches.add(i);
       }
     }
 
-    if (matches.length >= 2) {
-      studentId = texts[matches[1] + 1].removeSpaces();
-    } else if (matches.length == 1) {
-      studentId = texts[matches[0] + 1].removeSpaces();
+    // Student ID is the match with the digits
+    for (int i = 0; i < studentIdMatches.length; i++) {
+      if (studentIdMatches[i] + 1 < texts.length) {
+        String studentIdCandidate = texts[studentIdMatches[i] + 1].removeSpaces().removeNonDigits();
+        if (studentIdCandidate.length > 6) {
+          studentId = studentIdCandidate.removeSeparators('-');
+          break;
+        }
+      }
     }
 
     // Find and assign the Department
