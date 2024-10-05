@@ -21,8 +21,6 @@ class AddStudentScreen extends StatefulWidget {
   AddStudentScreenState createState() => AddStudentScreenState();
 }
 
-//TODO Validation check for student ID, TC no (Digits only)
-
 class AddStudentScreenState extends State<AddStudentScreen> {
   final _formKey = GlobalKey<FormState>();
   final AddStudentController controller = Get.put(AddStudentController());

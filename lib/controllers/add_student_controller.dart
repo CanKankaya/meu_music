@@ -12,8 +12,6 @@ class AddStudentController extends GetxController {
   final phoneNumberController = TextEditingController();
   final departmentController = TextEditingController();
 
-  //TODO Student ID fix, tcno fix
-
   void extractText(String text) async {
     //error handling
     if (text.isEmpty) {
@@ -26,6 +24,7 @@ class AddStudentController extends GetxController {
     // Define regular expressions for each piece of information
     final tcPattern = RegExp(r'kimlik ?no|TC|TRID|TR ID', caseSensitive: false);
     final tcPattern2 = RegExp(r'Fakülte|Yüksekokul|Faculty|School', caseSensitive: false);
+    final tcPattern3 = RegExp(r'MERSİN|ÜNİVERSİTESİ', caseSensitive: false);
     final namePattern = RegExp(r'soyad|Soyad|Name\s*Surname', caseSensitive: false);
     final studentIdPattern = RegExp(r'Öğrenci\s*no|student\s*ID', caseSensitive: false);
     final departmentPattern = RegExp(r'Bölüm|department', caseSensitive: false);
@@ -53,6 +52,14 @@ class AddStudentController extends GetxController {
             break;
           }
         }
+      }
+    }
+
+    // Third chance to find TC Kimlik No
+    if (tcKimlikNo == null || tcKimlikNo.isEmpty) {
+      index = texts.indexWhere((element) => tcPattern3.hasMatch(element));
+      if (index != -1 && index + 1 < texts.length) {
+        tcKimlikNo = texts[index + 1].removeSpaces().removeNonDigits();
       }
     }
 
@@ -122,9 +129,9 @@ class AddStudentController extends GetxController {
     }
 
     tcController.text = tcKimlikNo ?? "";
-    nameController.text = nameSurname ?? "";
+    nameController.text = nameSurname.capitalizeFirstLetterOfEachWord();
     studentNumberController.text = studentId ?? "";
-    departmentController.text = department ?? "";
+    departmentController.text = department.capitalizeFirstLetterOfEachWord();
   }
 
   bool isValidTcNo(String? tcKimlikNo) {

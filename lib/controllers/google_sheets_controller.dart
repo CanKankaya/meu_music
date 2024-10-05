@@ -6,7 +6,6 @@ import 'package:googleapis_auth/auth_io.dart';
 import 'package:intl/intl.dart';
 import 'package:meu_music/constants/private.dart';
 import 'package:meu_music/models/student.dart';
-import 'package:meu_music/services/text_helper.dart';
 
 class GoogleSheetsController extends GetxController {
   final _scopes = [SheetsApi.spreadsheetsScope];
@@ -136,11 +135,11 @@ class GoogleSheetsController extends GetxController {
 
       final values = students
           .map((student) => [
-                student.name.capitalizeFirstLetterOfEachWord(),
+                student.name,
                 student.tc,
                 student.studentNumber,
                 student.phoneNumber,
-                student.department.capitalizeFirstLetterOfEachWord(),
+                student.department,
                 student.payment ?? 'Ödeme Yapmadı',
                 student.addedDate != null
                     ? DateFormat('dd.MM.yyyy').format(student.addedDate!)
@@ -182,10 +181,6 @@ class GoogleSheetsController extends GetxController {
       log(students.length.toString());
       student.rowNumber = studentList.length + 1 + excelOffset;
       log(student.rowNumber.toString());
-
-      // Capitalize the first letter of each word in the name and department
-      student.name = student.name?.capitalizeFirstLetterOfEachWord();
-      student.department = student.department?.capitalizeFirstLetterOfEachWord();
     }
     studentList.addAll(students);
   }
