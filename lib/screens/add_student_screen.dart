@@ -21,11 +21,7 @@ class AddStudentScreen extends StatefulWidget {
   AddStudentScreenState createState() => AddStudentScreenState();
 }
 
-//TODO Make the payment option required
-
 //TODO Validation check for student ID, TC no (Digits only)
-
-//TODO Change IBAN and its QR to correct account
 
 class AddStudentScreenState extends State<AddStudentScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -33,10 +29,22 @@ class AddStudentScreenState extends State<AddStudentScreen> {
   final connectivityService = Get.find<ConnectivityService>();
 
   String? selectedPayment;
+  bool showPaymentValidationMessage = false;
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       // Handle form submission
+
+      if (selectedPayment == null) {
+        setState(() {
+          showPaymentValidationMessage = true;
+        });
+        return;
+      } else {
+        setState(() {
+          showPaymentValidationMessage = false;
+        });
+      }
       // You can call your add student function here
       final result = await widget.googleSheetsController.addStudents([
         Student(
@@ -226,6 +234,17 @@ class AddStudentScreenState extends State<AddStudentScreen> {
                     ],
                   ),
                 ),
+                if (showPaymentValidationMessage)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 24.0),
+                    child: Text(
+                      'Lütfen bir ödeme seçeneği seçin',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
                 TextButton(
                   onPressed: () {
                     showDialog(
