@@ -1,29 +1,40 @@
-# meu_music
+### Contact
 
-A new Flutter project.
+<a href="mailto:can.kankaya@outlook.com">
+  <img src="https://img.shields.io/badge/Microsoft_Outlook-0078D4?style=for-the-badge&logo=microsoft-outlook&logoColor=white" alt="Outlook" />
+	
+</a>
+<a href="https://www.linkedin.com/in/can-kankaya-738518158/">
+  <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" />
+</a>
 
-## Getting Started
+<a href="https://t.me/cankankaya">
+  <img src="https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram" />
+</a>
 
-This project is a starting point for a Flutter application that follows the
-[simple app state management
-tutorial](https://flutter.dev/to/state-management-sample).
+# Mersin University Music Community Management App
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+A management application developed for the Mersin University Music Community.
 
-## Assets
+## Features
+- Member list management  
+- Add, edit, and delete members  
+- Add members by scanning student cards using the camera  
+- Download the member list as a PDF as per the University request
+- Member list is stored in an online Google Sheet using Google's Sheets API, allowing edits directly from the web aswell
 
-The `assets` directory houses images, fonts, and any other files you want to
-include with your application.
 
-The `assets/images` directory contains [resolution-aware
-images](https://flutter.dev/to/resolution-aware-images).
+<img src="https://github.com/user-attachments/assets/cb38b967-a774-4bef-bad4-08abd7c34583" width="300" />
 
-## Localization
+<img src="https://github.com/user-attachments/assets/5d268050-c31a-41a5-8804-86b0240f36b0" width="300" />
 
-This project generates localized messages based on arb files found in
-the `lib/src/localization` directory.
+<img src="https://github.com/user-attachments/assets/6e3c30cb-ab0a-4429-a01c-c75e14defb65" width="300" />
 
-To support additional languages, please visit the tutorial on
-[Internationalizing Flutter apps](https://flutter.dev/to/internationalization).
+
+
+
+
+
+
+
+   
