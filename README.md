@@ -24,11 +24,11 @@ A management application developed for the Mersin University Music Community.
 - Member list is stored in an online Google Sheet using Google's Sheets API, allowing edits directly from the web aswell
 
 
-<img src="https://github.com/user-attachments/assets/cb38b967-a774-4bef-bad4-08abd7c34583" width="300" />
+<img src="https://github.com/user-attachments/assets/cb38b967-a774-4bef-bad4-08abd7c34583" width="400" />
 
-<img src="https://github.com/user-attachments/assets/5d268050-c31a-41a5-8804-86b0240f36b0" width="300" />
+<img src="https://github.com/user-attachments/assets/5d268050-c31a-41a5-8804-86b0240f36b0" width="400" />
 
-<img src="https://github.com/user-attachments/assets/6e3c30cb-ab0a-4429-a01c-c75e14defb65" width="300" />
+<img src="https://github.com/user-attachments/assets/6e3c30cb-ab0a-4429-a01c-c75e14defb65" width="400" />
 
 
 
